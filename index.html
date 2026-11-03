@@ -1,0 +1,136 @@
+
+<!DOCTYPE html>
+<html lang="my">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>မြန်မာစာအုပ်ဖတ် App</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#f3f4f6;color:#222}
+header{background:#174c37;color:white;padding:20px;text-align:center}
+nav{display:flex;gap:8px;padding:12px;background:white;position:sticky;top:0}
+button{border:0;border-radius:8px;padding:11px 15px;background:#176b49;color:white}
+input,textarea{width:100%;padding:12px;margin:7px 0;border:1px solid #ccc;border-radius:8px;font-size:16px}
+main{padding:15px;max-width:800px;margin:auto}
+.card{background:white;padding:15px;border-radius:12px;margin:12px 0;box-shadow:0 2px 8px #0001}
+.small{color:#777;font-size:13px}
+#reader{white-space:pre-wrap;line-height:2;font-size:19px}
+.hidden{display:none}
+</style>
+</head>
+<body>
+<header>
+<h2>📚 မြန်မာစာအုပ်ဖတ် App</h2>
+<p>စာပေချစ်သူများအတွက်</p>
+</header>
+<nav>
+<button onclick="home()">ပင်မ</button>
+<button onclick="showAdmin()">Admin</button>
+</nav>
+<main>
+<section id="home">
+<input id="search" placeholder="စာအုပ်ရှာရန်..." oninput="renderBooks()">
+<div id="books">စာအုပ်များ ဖတ်ရှုရန်...</div>
+</section>
+
+<section id="readerPage" class="hidden">
+<button onclick="home()">← နောက်သို့</button>
+<h2 id="bookTitle"></h2>
+<p class="small" id="bookInfo"></p>
+<div class="card" id="reader"></div>
+</section>
+
+<section id="admin" class="hidden">
+<h3>Admin - စာအုပ်အသစ်ထည့်ရန်</h3>
+<p>စာအုပ်အချက်အလက်ကို JSON ဖိုင်အဖြစ် ပြင်ဆင်ပြီး GitHub ရဲ့ books ဖိုလ်ဒါထဲ တင်ရပါမယ်။</p>
+<input id="adminTitle" placeholder="စာအုပ်အမည်">
+<input id="adminAuthor" placeholder="စာရေးသူ">
+<textarea id="adminContent" rows="8" placeholder="စာအုပ်အကြောင်းအရာ"></textarea>
+<button onclick="downloadBook()">JSON ဖိုင်ထုတ်ရန်</button>
+<p class="small">ထုတ်လာတဲ့ JSON ဖိုင်ကို GitHub ရဲ့ books ဖိုလ်ဒါထဲ တင်ပါ။</p>
+</section>
+</main>
+
+<script>
+let books=[];
+let current=null;
+
+async function loadBooks(){
+ try{
+  const r=await fetch('./books/index.json');
+  if(!r.ok) throw new Error();
+  const list=await r.json();
+  books=[];
+  for(const item of list){
+   const b=await fetch('./books/'+item.file);
+   if(b.ok) books.push(await b.json());
+  }
+ }catch(e){
+  books=[];
+ }
+ renderBooks();
+}
+
+function renderBooks(){
+ const q=document.getElementById('search').value.toLowerCase();
+ const box=document.getElementById('books');
+ const filtered=books.filter(b=>(b.title||'').toLowerCase().includes(q));
+ if(!filtered.length){
+  box.innerHTML='<div class="card">စာအုပ်မရှိသေးပါ။ Admin က စာအုပ်ထည့်ပေးပါ။</div>';
+  return;
+ }
+ box.innerHTML=filtered.map((b,i)=>`
+ <div class="card">
+ <h3>${escapeHTML(b.title)}</h3>
+ <p class="small">စာရေးသူ - ${escapeHTML(b.author||'မသိရှိ')}</p>
+ <button onclick="openBook(${i})">ဖတ်ရှုရန်</button>
+ </div>`).join('');
+}
+
+function openBook(i){
+ current=books.filter(b=>(b.title||'').toLowerCase().includes(document.getElementById('search').value.toLowerCase()))[i];
+ if(!current)return;
+ document.getElementById('home').classList.add('hidden');
+ document.getElementById('admin').classList.add('hidden');
+ document.getElementById('readerPage').classList.remove('hidden');
+ document.getElementById('bookTitle').textContent=current.title;
+ document.getElementById('bookInfo').textContent='စာရေးသူ - '+(current.author||'မသိရှိ');
+ document.getElementById('reader').textContent=current.content||'စာသားမရှိသေးပါ။';
+ let id='read_'+(current.title||'book');
+ let count=Number(localStorage.getItem(id)||0)+1;
+ localStorage.setItem(id,count);
+ document.getElementById('bookInfo').textContent+=' | ဒီဖုန်းတွင် ဖတ်ရှုမှု '+count+' ကြိမ်';
+}
+
+function home(){
+ document.getElementById('home').classList.remove('hidden');
+ document.getElementById('readerPage').classList.add('hidden');
+ document.getElementById('admin').classList.add('hidden');
+ renderBooks();
+}
+function showAdmin(){
+ document.getElementById('home').classList.add('hidden');
+ document.getElementById('readerPage').classList.add('hidden');
+ document.getElementById('admin').classList.remove('hidden');
+}
+function downloadBook(){
+ const title=document.getElementById('adminTitle').value.trim();
+ const author=document.getElementById('adminAuthor').value.trim();
+ const content=document.getElementById('adminContent').value.trim();
+ if(!title||!content){alert('စာအုပ်အမည်နဲ့ စာသား ဖြည့်ပါ');return;}
+ const data={title,author,content};
+ const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+ const a=document.createElement('a');
+ a.href=URL.createObjectURL(blob);
+ a.download='book-'+Date.now()+'.json';
+ a.click();
+ URL.revokeObjectURL(a.href);
+}
+function escapeHTML(s){
+ return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+loadBooks();
+</script>
+</body>
+</html>
