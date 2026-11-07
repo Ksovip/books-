@@ -48,14 +48,6 @@
             transition: 0.3s;
         }
 
-        .version-display {
-            text-align: center;
-            font-size: 12px;
-            color: #A38C62;
-            margin-top: 15px;
-            font-weight: bold;
-        }
-
         #book-list {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -183,8 +175,6 @@
         <span id="header-title">စာအုပ်စင်</span>
     </header>
 
-    <div class="version-display">လက်ရှိ ဗားရှင်း - <span id="current-version-text">မရှိသေးပါ</span></div>
-
     <!-- ခုန်ဆွခုန်ဆွ Update ခလုတ် (အသစ်ရှိမှသာ ပေါ်မည်) -->
     <div id="floating-btn" class="floating-update-btn" onclick="openUpdateModal()">
         🔄
@@ -211,29 +201,22 @@
         const GITHUB_RAW_URL = "https://raw.githubusercontent.com/Ksovip/books-/refs/heads/main/books/book1.json";
 
         document.addEventListener("DOMContentLoaded", () => {
-            updateVersionDisplay();
             loadBooksFromLocal();
             checkForUpdates(); // ဝင်ဝင်ချင်း အသံတိတ် စစ်ဆေးမည်
         });
-
-        function updateVersionDisplay() {
-            const v = localStorage.getItem("app_version") || "မရှိသေးပါ";
-            document.getElementById("current-version-text").innerText = v;
-        }
 
         // နောက်ကွယ်မှ အပ်ဒိတ်ရှိ/မရှိ အလိုအလျောက် စစ်ဆေးခြင်း
         function checkForUpdates() {
             fetch(GITHUB_RAW_URL)
                 .then(response => response.json())
                 .then(data => {
-                    // ပထမဆုံးအကြိမ်ဆိုလျှင် Version ကို 0.0 အဖြစ် သတ်မှတ်မည်
                     const currentVersion = localStorage.getItem("app_version") || "0.0";
                     const newVersion = data.version;
 
                     // GitHub မှ Version က ပိုကြီးနေမှသာ ခလုတ်ပေါ်မည်
                     if (newVersion && parseFloat(newVersion) > parseFloat(currentVersion)) {
                         window.tempUpdateData = data; 
-                        document.getElementById("floating-btn").style.display = "flex"; // ခလုတ်ကို ဖော်ပြမည်
+                        document.getElementById("floating-btn").style.display = "flex"; 
                     }
                 })
                 .catch(error => console.log("အင်တာနက်မရှိပါ။"));
@@ -248,11 +231,9 @@
         function applyUpdate() {
             if (window.tempUpdateData) {
                 localStorage.setItem("offline_books", JSON.stringify(window.tempUpdateData.books));
-                localStorage.setItem("app_version", window.tempUpdateData.version);
+                localStorage.setItem("app_version", window.tempUpdateData.version); // နောက်ကွယ်မှာ မှတ်ထားမည်
                 loadBooksFromLocal();
-                updateVersionDisplay();
                 closeModal('update-modal');
-                // အပ်ဒိတ်လုပ်ပြီးသည်နှင့် ခလုတ်ကို ပြန်ဖျောက်မည်
                 document.getElementById("floating-btn").style.display = "none"; 
             }
         }
@@ -273,7 +254,7 @@
                     listContainer.appendChild(itemDiv);
                 });
             } else {
-                listContainer.innerHTML = "<p style='grid-column: span 3; text-align:center; color: #888;'>စာအုပ်များ မရှိသေးပါ။ အင်တာနက်ဖွင့်ပြီး ခဏစောင့်ပါ။</p>";
+                listContainer.innerHTML = "<p style='grid-column: span 3; text-align:center; color: #888; margin-top:20px;'>စာအုပ်များ မရှိသေးပါ။ အင်တာနက်ဖွင့်ပြီး ခဏစောင့်ပါ။</p>";
             }
         }
 
@@ -283,7 +264,6 @@
 
         function showReadView(title, content) {
             document.getElementById("book-list").style.display = "none";
-            document.querySelector(".version-display").style.display = "none";
             
             // စာဖတ်နေချိန် ခလုတ်ပေါ်နေခဲ့လျှင် ယာယီဖျောက်ထားမည်
             const isFloatingVisible = document.getElementById("floating-btn").style.display === "flex";
@@ -305,7 +285,6 @@
         function showListView() {
             document.getElementById("read-view").style.display = "none";
             document.getElementById("book-list").style.display = "grid";
-            document.querySelector(".version-display").style.display = "block";
             
             // စာဖတ်ပြီး ပြန်ထွက်လာလျှင် ခလုတ်ပေါ်သင့်ပါက ပြန်ဖော်မည်
             if (document.getElementById("floating-btn").dataset.wasVisible === "true") {
