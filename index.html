@@ -5,220 +5,315 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>စာအုပ်စင်</title>
     <style>
-        /* အခြေခံ UI ဒီဇိုင်းများ */
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Pyidaungsu', Arial, sans-serif;
             margin: 0;
-            background-color: #f0f2f5;
-            color: #333;
+            background-color: #FCFAED;
+            color: #3E362E;
+            padding-bottom: 80px; 
         }
+        
         header {
-            background-color: #1a73e8;
+            background: linear-gradient(135deg, #D4AF37, #E6C247);
             color: white;
-            padding: 16px;
+            padding: 16px 20px;
             text-align: center;
-            font-size: 18px;
+            font-size: 19px;
             font-weight: bold;
             position: sticky;
             top: 0;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 6px rgba(212, 175, 55, 0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-bottom-left-radius: 12px;
+            border-bottom-right-radius: 12px;
+            z-index: 50;
         }
+        
         #back-btn {
             position: absolute;
             left: 15px;
-            top: 15px;
-            background: none;
+            background: rgba(255, 255, 255, 0.2);
             border: none;
             color: white;
-            font-size: 16px;
+            font-size: 18px;
             cursor: pointer;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
             display: none;
+            align-items: center;
+            justify-content: center;
+            transition: 0.3s;
         }
-        
-        /* စာအုပ်စာရင်း (ListView) */
+
+        .version-display {
+            text-align: center;
+            font-size: 12px;
+            color: #A38C62;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+
         #book-list {
-            padding: 10px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            padding: 20px 15px;
         }
         .book-item {
             background: white;
-            padding: 15px;
-            margin-bottom: 10px;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            font-size: 16px;
+            padding: 15px 5px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            font-size: 14px;
             font-weight: bold;
+            color: #4A3F35;
+            text-align: center;
             cursor: pointer;
-            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 90px;
+            border: 2px solid transparent;
+            transition: all 0.2s ease;
         }
         .book-item:active {
-            background-color: #e0e0e0;
+            border-color: #D4AF37;
+            background-color: #FFF9E6;
+            transform: scale(0.97);
         }
 
-        /* စာဖတ်မည့်နေရာ (Read View) */
         #read-view {
             display: none;
-            padding: 20px;
-            background: white;
+            padding: 25px 20px;
+            background: #FCFAED;
             min-height: 100vh;
         }
         #read-title {
             font-size: 22px;
+            margin-top: 0;
             margin-bottom: 15px;
-            color: #1a73e8;
+            color: #B8860B;
+            text-align: center;
         }
         #read-content {
             font-size: 16px;
-            line-height: 1.8;
-            white-space: pre-wrap; /* စာပိုဒ်အကွာအဝေးများကို ထိန်းသိမ်းရန် */
+            line-height: 1.9;
+            color: #333;
+            white-space: pre-wrap;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
         }
 
-        /* Update တောင်းမည့် Box (Modal Dialog) */
+        /* App ပုံစံ Modal */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5);
-            display: flex;
+            background: rgba(0,0,0,0.4);
+            display: none;
             justify-content: center;
             align-items: center;
             z-index: 1000;
         }
         .modal-box {
             background: white;
-            padding: 20px;
-            border-radius: 10px;
+            padding: 25px 20px;
+            border-radius: 16px;
             width: 80%;
-            max-width: 300px;
+            max-width: 320px;
             text-align: center;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            animation: popIn 0.3s ease-out;
         }
-        .modal-box h3 {
-            margin-top: 0;
-            color: #333;
+        @keyframes popIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
         }
+        .modal-box h3 { margin-top: 0; color: #B8860B; font-size: 20px; }
+        .modal-box p { color: #666; margin-bottom: 20px; line-height: 1.5; }
+        
         .btn {
-            padding: 10px 20px;
+            padding: 12px 20px;
             margin: 5px;
             border: none;
-            border-radius: 5px;
-            font-size: 14px;
+            border-radius: 8px;
             cursor: pointer;
             font-weight: bold;
+            font-size: 15px;
+            width: 45%;
         }
-        .btn-update {
-            background: #1a73e8;
+        .btn-update { background: #D4AF37; color: white; }
+        .btn-cancel { background: #F0F0F0; color: #555; }
+
+        /* အလယ်မှ ခုန်ဆွခုန်ဆွဖြစ်နေသော Update ခလုတ် (မူလက ဖျောက်ထားမည်) */
+        .floating-update-btn {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #D4AF37, #E6C247);
             color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: none; /* အပ်ဒိတ်မရှိလျှင် ပျောက်နေမည် */
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
+            cursor: pointer;
+            z-index: 100;
+            animation: bounce 2s infinite;
         }
-        .btn-cancel {
-            background: #ddd;
-            color: #333;
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
+            40% { transform: translateX(-50%) translateY(-15px); }
+            60% { transform: translateX(-50%) translateY(-7px); }
         }
     </style>
 </head>
 <body>
 
-    <!-- ခေါင်းစဉ်ပိုင်း -->
     <header>
-        <button id="back-btn" onclick="showListView()">❮ နောက်သို့</button>
-        <span id="header-title">ကျွန်တော့်စာအုပ်စင်</span>
+        <button id="back-btn" onclick="showListView()">❮</button>
+        <span id="header-title">စာအုပ်စင်</span>
     </header>
 
-    <!-- Update Dialog Box -->
+    <div class="version-display">လက်ရှိ ဗားရှင်း - <span id="current-version-text">မရှိသေးပါ</span></div>
+
+    <!-- ခုန်ဆွခုန်ဆွ Update ခလုတ် (အသစ်ရှိမှသာ ပေါ်မည်) -->
+    <div id="floating-btn" class="floating-update-btn" onclick="openUpdateModal()">
+        🔄
+    </div>
+
+    <!-- ဗားရှင်းအသစ်ရှိလျှင် ပေါ်မည့် Box -->
     <div id="update-modal" class="modal-overlay">
         <div class="modal-box">
-            <h3>အသိပေးချက်</h3>
-            <p>အပ်ဒိတ် အသစ်ရယူပါ</p>
-            <button class="btn btn-update" onclick="fetchBooksFromGitHub()">ရယူမည်</button>
-            <button class="btn btn-cancel" onclick="closeModal()">နောက်မှ</button>
+            <h3>စာအုပ်အသစ်များ ရှိပါသည်</h3>
+            <p>ပိုမိုကောင်းမွန်အောင် အပ်ဒိတ် လုပ်ပါ။</p>
+            <button class="btn btn-update" onclick="applyUpdate()">ရယူမည်</button>
+            <button class="btn btn-cancel" onclick="closeModal('update-modal')">နောက်မှ</button>
         </div>
     </div>
 
-    <!-- စာအုပ်များပြမည့်နေရာ -->
     <div id="book-list"></div>
 
-    <!-- စာဖတ်မည့်နေရာ -->
     <div id="read-view">
         <h2 id="read-title"></h2>
         <div id="read-content"></div>
     </div>
 
     <script>
-        // သင့် GitHub ရဲ့ books.json Raw URL ကို ဒီနေရာမှာ ထည့်ပါ
         const GITHUB_RAW_URL = "https://raw.githubusercontent.com/Ksovip/books-/refs/heads/main/books/book1.json";
 
-        // App စဖွင့်ချိန် လုပ်ဆောင်မည့်အရာများ
         document.addEventListener("DOMContentLoaded", () => {
-            loadBooksFromLocal(); // အင်တာနက်မလိုဘဲ ဖုန်းထဲက Data အရင်ဆွဲထုတ်ပြမည်
+            updateVersionDisplay();
+            loadBooksFromLocal();
+            checkForUpdates(); // ဝင်ဝင်ချင်း အသံတိတ် စစ်ဆေးမည်
         });
 
-        // GitHub မှ Data လှမ်းယူခြင်း
-        function fetchBooksFromGitHub() {
-            document.querySelector('.btn-update').innerText = "ရယူနေပါသည်...";
-            
+        function updateVersionDisplay() {
+            const v = localStorage.getItem("app_version") || "မရှိသေးပါ";
+            document.getElementById("current-version-text").innerText = v;
+        }
+
+        // နောက်ကွယ်မှ အပ်ဒိတ်ရှိ/မရှိ အလိုအလျောက် စစ်ဆေးခြင်း
+        function checkForUpdates() {
             fetch(GITHUB_RAW_URL)
                 .then(response => response.json())
                 .then(data => {
-                    // ရလာတဲ့ Data ကို Offline ဖတ်ဖို့ localStorage ထဲ သိမ်းမည်
-                    localStorage.setItem("offline_books", JSON.stringify(data));
-                    loadBooksFromLocal(); // စာရင်းကို အသစ်ပြန် Refresh လုပ်မည်
-                    closeModal(); // Box ကိုပိတ်မည်
+                    // ပထမဆုံးအကြိမ်ဆိုလျှင် Version ကို 0.0 အဖြစ် သတ်မှတ်မည်
+                    const currentVersion = localStorage.getItem("app_version") || "0.0";
+                    const newVersion = data.version;
+
+                    // GitHub မှ Version က ပိုကြီးနေမှသာ ခလုတ်ပေါ်မည်
+                    if (newVersion && parseFloat(newVersion) > parseFloat(currentVersion)) {
+                        window.tempUpdateData = data; 
+                        document.getElementById("floating-btn").style.display = "flex"; // ခလုတ်ကို ဖော်ပြမည်
+                    }
                 })
-                .catch(error => {
-                    alert("အင်တာနက်ချိတ်ဆက်မှု မရှိပါ သို့မဟုတ် URL မှားယွင်းနေပါသည်။");
-                    closeModal();
-                });
+                .catch(error => console.log("အင်တာနက်မရှိပါ။"));
         }
 
-        // LocalStorage မှ Data ယူ၍ UI တွင်ပြခြင်း
+        // ခလုတ်နှိပ်မှ Box ပေါ်လာရန်
+        function openUpdateModal() {
+            document.getElementById("update-modal").style.display = "flex";
+        }
+
+        // အပ်ဒိတ်ကို လက်ခံပြီး သိမ်းဆည်းရန်
+        function applyUpdate() {
+            if (window.tempUpdateData) {
+                localStorage.setItem("offline_books", JSON.stringify(window.tempUpdateData.books));
+                localStorage.setItem("app_version", window.tempUpdateData.version);
+                loadBooksFromLocal();
+                updateVersionDisplay();
+                closeModal('update-modal');
+                // အပ်ဒိတ်လုပ်ပြီးသည်နှင့် ခလုတ်ကို ပြန်ဖျောက်မည်
+                document.getElementById("floating-btn").style.display = "none"; 
+            }
+        }
+
         function loadBooksFromLocal() {
             const listContainer = document.getElementById("book-list");
-            listContainer.innerHTML = ""; // အဟောင်းတွေ ဖျက်မည်
+            listContainer.innerHTML = ""; 
 
             const savedData = localStorage.getItem("offline_books");
             
             if (savedData) {
                 const books = JSON.parse(savedData);
                 books.forEach(book => {
-                    // ခေါင်းစဉ်တစ်ခုချင်းစီအတွက် Element ဆောက်ခြင်း
                     const itemDiv = document.createElement("div");
                     itemDiv.className = "book-item";
                     itemDiv.innerText = book.title;
-                    
-                    // နှိပ်လိုက်လျှင် စာဖတ်မည့် View သို့ ပြောင်းရန်
                     itemDiv.onclick = () => showReadView(book.title, book.content);
-                    
                     listContainer.appendChild(itemDiv);
                 });
             } else {
-                listContainer.innerHTML = "<p style='text-align:center; margin-top:20px;'>စာအုပ်များ မရှိသေးပါ။ အပ်ဒိတ် ရယူပါ။</p>";
+                listContainer.innerHTML = "<p style='grid-column: span 3; text-align:center; color: #888;'>စာအုပ်များ မရှိသေးပါ။ အင်တာနက်ဖွင့်ပြီး ခဏစောင့်ပါ။</p>";
             }
         }
 
-        // Dialog Box ပိတ်ရန်
-        function closeModal() {
-            document.getElementById("update-modal").style.display = "none";
-            document.querySelector('.btn-update').innerText = "ရယူမည်";
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = "none";
         }
 
-        // စာဖတ်မည့် စာမျက်နှာကို ပြရန်
         function showReadView(title, content) {
             document.getElementById("book-list").style.display = "none";
+            document.querySelector(".version-display").style.display = "none";
+            
+            // စာဖတ်နေချိန် ခလုတ်ပေါ်နေခဲ့လျှင် ယာယီဖျောက်ထားမည်
+            const isFloatingVisible = document.getElementById("floating-btn").style.display === "flex";
+            if (isFloatingVisible) {
+                document.getElementById("floating-btn").dataset.wasVisible = "true";
+                document.getElementById("floating-btn").style.display = "none";
+            }
+
             document.getElementById("read-view").style.display = "block";
             
             document.getElementById("read-title").innerText = title;
             document.getElementById("read-content").innerText = content;
             
-            // Header ကို ပြင်မည်
             document.getElementById("header-title").innerText = "စာဖတ်ရန်";
-            document.getElementById("back-btn").style.display = "inline-block";
+            document.getElementById("back-btn").style.display = "flex";
+            window.scrollTo(0, 0); 
         }
 
-        // စာအုပ်စာရင်း စာမျက်နှာသို့ ပြန်သွားရန်
         function showListView() {
             document.getElementById("read-view").style.display = "none";
-            document.getElementById("book-list").style.display = "block";
+            document.getElementById("book-list").style.display = "grid";
+            document.querySelector(".version-display").style.display = "block";
             
-            // Header ကို နဂိုအတိုင်းပြန်ထားမည်
-            document.getElementById("header-title").innerText = "ကျွန်တော့်စာအုပ်စင်";
+            // စာဖတ်ပြီး ပြန်ထွက်လာလျှင် ခလုတ်ပေါ်သင့်ပါက ပြန်ဖော်မည်
+            if (document.getElementById("floating-btn").dataset.wasVisible === "true") {
+                document.getElementById("floating-btn").style.display = "flex";
+                document.getElementById("floating-btn").dataset.wasVisible = "false";
+            }
+            
+            document.getElementById("header-title").innerText = "စာအုပ်စင်";
             document.getElementById("back-btn").style.display = "none";
         }
     </script>
